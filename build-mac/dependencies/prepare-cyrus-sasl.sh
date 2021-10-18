@@ -5,12 +5,6 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 version=2.1.26
 ARCHIVE=cyrus-sasl-$version
 ARCHIVE_NAME=$ARCHIVE.tar.gz
-ARCHIVE_PATCH=$ARCHIVE.patch
-#url=ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/$ARCHIVE_NAME
-#url=ftp://ftp.cyrusimap.org/cyrus-sasl/$ARCHIVE_NAME
-#url=https://www.cyrusimap.org/releases/$ARCHIVE_NAME
-url=https://github.com/cyrusimap/cyrus-sasl/releases/download/$ARCHIVE/$ARCHIVE_NAME
-patchfile=cyrus-2.1.25-libetpan.patch
 
 scriptdir="`pwd`"
 
@@ -36,33 +30,12 @@ if test -f "$resultdir/libsasl-$version-ios.tar.gz"; then
 	exit 0
 fi
 
-# download package file
-
-if test -f "$current_dir/packages/$ARCHIVE_NAME" ; then
-	:
-else
-	echo "download source package - $url"
-
-	mkdir -p "$current_dir/packages"
-  cd "$current_dir/packages"
-	curl -L -O "$url"
-	if test x$? != x0 ; then
-		echo fetch of $ARCHIVE_NAME failed
-		exit 1
-	fi
-fi
-
-if [ ! -e "$current_dir/packages/$ARCHIVE_NAME" ]; then
-    echo "Missing archive $ARCHIVE"
-    exit 1
-fi
-
 echo "prepare sources"
 
 cd "$srcdir"
-tar -xzf "$current_dir/packages/$ARCHIVE_NAME"
+cp -R "$current_dir/$ARCHIVE" .
 if [ $? != 0 ]; then
-    echo "Unable to decompress $ARCHIVE_NAME"
+    echo "Unable to copy source $ARCHIVE"
     exit 1
 fi
 
@@ -70,8 +43,6 @@ logfile="$srcdir/$ARCHIVE/build.log"
 
 echo "*** patching sources ***" > "$logfile" 2>&1
 
-cd "$srcdir/$ARCHIVE"
-patch -p1 < $current_dir/$patchfile
 # patch source files
 cd "$srcdir/$ARCHIVE/include"
 sed -E 's/\.\/\$< /.\/\$<i386 /' < Makefile.am > Makefile.am.new
